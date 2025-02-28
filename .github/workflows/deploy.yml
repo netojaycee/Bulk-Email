@@ -1,0 +1,39 @@
+name: 🚀 Deploy Next.js App with PNPM to Server
+
+on:
+  push:
+    branches:
+      - master   # Runs on direct push to master
+  pull_request:
+    branches:
+      - master 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📂 Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: 🔑 Setup SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: 🚀 Deploy via SSH
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          cd /var/www/html/mhapy
+          git pull origin main
+          pnpm install --frozen-lockfile
+          pnpm build
+          pm2 restart mhapy || pm2 start pnpm --name "mhapy" -- start --port 2000
+        EOF
+      env:
+        SSH_USER: ${{ secrets.SSH_USER }}
+        SERVER_IP: ${{ secrets.SERVER_IP }}
