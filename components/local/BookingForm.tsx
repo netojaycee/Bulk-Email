@@ -17,8 +17,9 @@ import {
 import React, { useState } from "react";
 import ErrorMessage from "@/components/local/errorMessage";
 import { useSendEmailMutation } from "@/redux/appData";
-import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
+import QuillEditor from "./QuillEditor";
+
 
 const uploadSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
@@ -48,7 +49,7 @@ export default function BookingForm() {
     try {
       const formData = new FormData();
       formData.append("subject", values.subject);
-      formData.append("message", values.message);
+      formData.append("message", values.message); // Quill message is HTML
 
       if (values.file && values.file.length > 0) {
         formData.append("file", values.file[0]); // Ensure it's the actual file
@@ -67,7 +68,6 @@ export default function BookingForm() {
 
   React.useEffect(() => {
     if (isSuccess) {
-      // console.log("Success:", data);
       toast.success("Emails sent successfully!");
       form.reset();
     } else if (isError) {
@@ -82,7 +82,7 @@ export default function BookingForm() {
   }, [isSuccess, isError, error, data, form]);
 
   return (
-    <div className='flex flex-col items-center justify-center w-full'>
+    <div className='flex flex-col items-center justify-center w-full h-full'>
       <AnimatePresence>
         <motion.div
           key='uploadForm'
@@ -128,20 +128,18 @@ export default function BookingForm() {
                   )}
                 />
 
-                {/* Message */}
                 <FormField
                   control={form.control}
                   name='message'
                   render={({ field }) => (
-                    <FormItem className='w-full'>
+                    <FormItem className='w-full '>
                       <FormLabel className='font-semibold text-base'>
                         Message
                       </FormLabel>
                       <FormControl>
-                        <Textarea
-                          className='w-full'
-                          placeholder='Write your email message...'
-                          {...field}
+                        <QuillEditor
+                          value={field.value}
+                          onChange={field.onChange}
                         />
                       </FormControl>
                       <FormMessage />
@@ -154,7 +152,7 @@ export default function BookingForm() {
                   control={form.control}
                   name='file'
                   render={({ field }) => (
-                    <FormItem className='w-full'>
+                    <FormItem className='w-full '>
                       <FormLabel className='font-semibold text-base'>
                         Upload Excel File (.xlsx)
                       </FormLabel>

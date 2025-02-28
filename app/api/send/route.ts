@@ -21,8 +21,8 @@ export async function POST(req: Request) {
         const subject = formData.get("subject") as string;
         const message = formData.get("message") as string;
 
-        console.log("Received subject:", subject);
-        console.log("Received message:", message);
+        // console.log("Received subject:", subject);
+        // console.log("Received message:", message);
 
         if (!file || !subject || !message) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         const sheet = workbook.Sheets[sheetName];
         const recipients: Recipient[] = xlsx.utils.sheet_to_json(sheet);
 
-        console.log("Parsed Recipients:", recipients);
+        // console.log("Parsed Recipients:", recipients);
 
         // Validate Email Column
         if (!recipients.every((r: any) => r["Email"])) {
@@ -60,26 +60,21 @@ export async function POST(req: Request) {
 
         // Send Emails
         for (const recipient of recipients) {
-            // Format message with recipient's first and last name
-            const personalizedMessage = `
-                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                    <p>Dear <strong>${recipient["First Name"]} ${recipient["Last Name"]}</strong>,</p>
-                    <p>${message.replace("{{FirstName}}", recipient["First Name"]).replace("{{LastName}}", recipient["Last Name"])}</p>
-                    <br>
-                    <p>Best regards,</p>
-                    <p><strong>Your Company Name</strong></p>
-                </div>
-            `;
+            // Replace all occurrences of placeholders
+            const personalizedMessage = message
+                .replace(/{{FirstName}}/g, recipient["First Name"])
+                .replace(/{{LastName}}/g, recipient["Last Name"]);
 
             const mailOptions = {
                 from: senderEmail,
                 to: recipient.Email,
                 subject,
-                html: personalizedMessage,
+                html: personalizedMessage, // No extra formatting, just the message
             };
 
             await transporter.sendMail(mailOptions);
         }
+
 
         return NextResponse.json({ message: "Emails sent successfully" }, { status: 200 });
 
