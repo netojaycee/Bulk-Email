@@ -67,13 +67,13 @@ export default function BookingForm() {
 
   React.useEffect(() => {
     if (isSuccess) {
-      console.log("Success:", data);
+      // console.log("Success:", data);
       toast.success("Emails sent successfully!");
       form.reset();
     } else if (isError) {
       if ("data" in error && typeof error.data === "object") {
-        setGlobalError(error.data?.message || "Something went wrong.");
-        toast.error(error.data?.message || "Something went wrong.");
+        setGlobalError("Something went wrong.");
+        toast.error("Something went wrong.");
       } else {
         setGlobalError("An unexpected error occurred.");
         toast.error("An unexpected error occurred.");
@@ -82,7 +82,7 @@ export default function BookingForm() {
   }, [isSuccess, isError, error, data, form]);
 
   return (
-    <div className='flex flex-col items-center justify-center w-full '>
+    <div className='flex flex-col items-center justify-center w-full'>
       <AnimatePresence>
         <motion.div
           key='uploadForm'
