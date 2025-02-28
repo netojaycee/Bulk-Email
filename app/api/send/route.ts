@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
         // Read file as buffer
         const buffer = Buffer.from(await file.arrayBuffer());
-        console.log("File buffer size:", buffer.length);
+        // console.log("File buffer size:", buffer.length);
 
         // Parse Excel File
         const workbook = xlsx.read(buffer, { type: "buffer" });
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
                 .replace(/{{LastName}}/g, recipient["Last Name"]);
 
             const mailOptions = {
-                from: senderEmail,
+                from: `The Green Money Project Team <${senderEmail}>`,
                 to: recipient.Email,
                 subject,
                 html: personalizedMessage, // No extra formatting, just the message
